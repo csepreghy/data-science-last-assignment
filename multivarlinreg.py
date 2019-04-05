@@ -6,14 +6,25 @@ import numpy as np
 #
 # note: remember to either expect an initial column of 1's in the input X, or to append this within your code
 
-def multivarlinreg(X, y):
-  alpha = 0.005
-  n_iters = 1000
-  n_features = len(X[0])
+def multivarlinreg(X, y, alpha, n_iters):
+  if len(X.shape) == 2: n_features = X.shape[1]
+  if len(X.shape) == 1: n_features = 1
 
   # Add a column of of ones to the input as the bias / w0
-  one_column = np.ones((X.shape[0], 1))
-  X = np.concatenate((one_column, X), axis=1)
+  print('X.shape', X.shape)
+
+  if len(X.shape) == 2:
+    one_column = np.ones((X.shape[0], 1))
+    X = np.concatenate((one_column, X), axis=1)
+
+  if len(X.shape) == 1:
+    one_column = np.squeeze(np.ones((X.shape[0], 1)))
+    print('one_column.shape', one_column.shape)
+    print('X.shape', X.shape)
+    # X = np.concatenate((one_column, X), axis=1)
+    X = np.vstack((one_column, X.T)).T
+
+  print('X.shape', X)
 
   # Initializing weights with zeroes (+1 because of the added column of ones)
   weights = np.zeros(n_features+1)
@@ -25,13 +36,15 @@ def multivarlinreg(X, y):
 
 
 def get_hypothesis(weights, X, n_features):
-    hypothesis = np.ones((X.shape[0], 1))
-    weights = weights.reshape(1, n_features+1)
-    for i in range(X.shape[0]):
-        hypothesis[i] = float(np.matmul(weights, X[i]))
-    hypothesis = hypothesis.reshape(X.shape[0])
+  hypothesis = np.ones((X.shape[0], 1))
+  weights = weights.reshape(1, n_features+1)
+  
+  for i in range(X.shape[0]):
+    hypothesis[i] = float(np.matmul(weights, X[i]))
+  
+  hypothesis = hypothesis.reshape(X.shape[0])
     
-    return hypothesis
+  return hypothesis
 
 
 def gradient_descent(weights, alpha, n_iters, hypothesis, X, y, n_features):
