@@ -220,20 +220,29 @@ class Plotify:
   def plot(
       self,
       y_list,
-      show=True,
       ylabel='Y label',
       xlabel='X label',
       title='Title',
+      show_plot=True,
       use_x_list_as_xticks=False,
+      tickfrequencyone=False,
+      equal_axis=False
   ):
     fig, ax = self.get_figax()
 
     ax.set_ylabel(ylabel)
     ax.set_xlabel(xlabel)
     ax.set_title(title)
+    
+    if equal_axis == True:
+      plt.axis('equal')
+
+    if tickfrequencyone == True:
+      ax.xaxis.set_major_locator(ticker.MultipleLocator(1))
 
     plt.plot(y_list, color=self.c_orange)
-    if show == True:
+
+    if show_plot == True:
       plt.show()
 
     return
