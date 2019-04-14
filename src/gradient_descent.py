@@ -74,6 +74,7 @@ def gradient_descent(alpha_list, max_iterations, precision):
     print('Minimum of f(x) calculated with Scipy: ', minimum.x)
     print('The local minimum occurs at', i, 'iterations and is: ', final_minimum)
 
-    plt.show()
+    # plt.show()
+    return final_minimum
 
 gradient_descent(alpha_list=[0.1, 0.01, 0.001, 0.0001], max_iterations=10000, precision=10e-10)
