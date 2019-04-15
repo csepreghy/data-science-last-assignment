@@ -4,6 +4,7 @@ import numpy as np
 import math
 import random
 from scipy.optimize import fmin_tnc
+from plotify import Plotify
 
 def logistic_regression(X, y, X_test=[], y_test=[]):
   style.use('fivethirtyeight')
@@ -32,8 +33,6 @@ def logistic_regression(X, y, X_test=[], y_test=[]):
   plt.show()
 
   return parameters
-
-
 
 def sigmoid(x):
   return 1 / (1 + np.exp(-x))
@@ -67,19 +66,52 @@ def fit(x, y, theta):
 
 
 def predict(x, parameters):
-    theta = parameters[:, np.newaxis]
-    return probability(theta, x)
+  theta = parameters[:, np.newaxis]
+  return probability(theta, x)
 
 
 def accuracy(x, actual_classes, parameters, probab_threshold=0.5):
-    predicted_classes = (predict(x, parameters) >=
-                         probab_threshold).astype(int)
-    predicted_classes = predicted_classes.flatten()
-    accuracy = np.mean(predicted_classes == actual_classes)
-    return accuracy * 100
+  predicted_classes = (predict(x, parameters) >=
+                        probab_threshold).astype(int)
+  predicted_classes = predicted_classes.flatten()
+  accuracy = np.mean(predicted_classes == actual_classes)
+  return accuracy * 100
 
+def logistic_regression__init__():
+  iris2d1_train = np.loadtxt('datasets/Iris2D1_train.txt')
+  iris2d1_test = np.loadtxt('datasets/Iris2D1_test.txt')
 
+  iris2d1_train_X = iris2d1_train[:, :-1]
+  iris2d1_train_y = iris2d1_train[:, -1]
 
+  iris2d1_test_X = iris2d1_test[:, :-1]
+  iris2d1_test_y = iris2d1_test[:, -1]
+
+  iris2d2_train = np.loadtxt('datasets/Iris2D2_train.txt')
+  iris2d2_test = np.loadtxt('datasets/Iris2D2_test.txt')
+
+  iris2d2_train_X = iris2d2_train[:, :-1]
+  iris2d2_train_y = iris2d2_train[:, -1]
+
+  iris2d2_test_X = iris2d2_test[:, :-1]
+  iris2d2_test_y = iris2d2_test[:, -1]
+
+  parameters1 = logistic_regression(iris2d1_train_X, iris2d1_train_y)
+  iris2d1_test_X = np.c_[np.ones((iris2d1_test_X.shape[0], 1)), iris2d1_test_X]
+  iris2d1_test_y = iris2d1_test_y[:, np.newaxis]
+
+  accuracy1 = accuracy(iris2d1_test_X, iris2d1_test_y.flatten(), parameters=parameters1)
+  print('parameters1', parameters1)
+  print('accuracy1', accuracy1)
+
+  parameters2 = logistic_regression(iris2d2_train_X, iris2d2_train_y)
+  iris2d2_test_X = np.c_[np.ones((iris2d2_test_X.shape[0], 1)), iris2d2_test_X]
+  iris2d2_test_y = iris2d2_test_y[:, np.newaxis]
+
+  accuracy2 = accuracy(iris2d2_test_X, iris2d2_test_y.flatten(), parameters=parameters2)
+  print('parameters2', parameters2)
+  print('accuracy2', accuracy2)
+  
 
 # x = np.linspace(-10, 10, num=1000)
 # plt.plot(x, sigmoid(x))
@@ -87,3 +119,4 @@ def accuracy(x, actual_classes, parameters, probab_threshold=0.5):
 # plt.ylabel('y')
 # plt.title('Plot of sigmoid function')
 
+logistic_regression__init__()

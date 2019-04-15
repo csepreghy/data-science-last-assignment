@@ -4,17 +4,18 @@ from sklearn.decomposition import PCA
 import matplotlib.pyplot as plt
 from plotify import Plotify
 from sklearn.cluster import KMeans
+from sklearn.neighbors import KNeighborsClassifier
+from sklearn.model_selection import train_test_split, cross_val_score
 
 plotify = Plotify()
 
 plt.style.use('ggplot')
 
-def pca(X, show_pc_plots=True, with_std=False):
+def pca(X, show_pc_plots=False, with_std=False):
   eigenvalues = []
   eigenvectors = []
 
   scaler = StandardScaler(with_std=with_std, with_mean=True)
-
   X = scaler.fit_transform(X)
 
   mean = np.mean(X, axis=0)
@@ -80,12 +81,12 @@ def display_digit(digit, labeled=True, title=""):
     plt.title("Inferred label: " + str(title))
 
 def multidimension_scaling(data, d, show_pc_plots):
-  eigen_values, eigen_vectors, mean = pca(data, show_pc_plots=show_pc_plots)
+  eigen_values, eigen_vectors, mean = pca(data, show_pc_plots=False)
   datamatrix = np.dot(np.array(eigen_vectors).T, data.T)
 
   return datamatrix[:d]
 
-def pca__init__(n_components):
+def kmneans__init__(n_components, show_pc_plots):
   mnist_X = np.loadtxt('datasets/MNIST_179_digits.txt')
   mnist_y = np.loadtxt('datasets/MNIST_179_labels.txt')
 
@@ -106,15 +107,56 @@ def pca__init__(n_components):
     cluster_1s = np.where(cluster == 1)[0]
     cluster_7s = np.where(cluster == 7)[0]
     cluster_9s = np.where(cluster == 9)[0]
-    print('There is ', round(len(cluster_1s) / len(cluster) * 100, 3), '% 1s in cluster', i)
-    print('There is ', round(len(cluster_7s) / len(cluster) * 100, 3), '% 7s in cluster', i)
-    print('There is ', round(len(cluster_9s) / len(cluster) * 100, 3), '% 9s in cluster', i)
+    print('There is ', round(len(cluster_1s) / len(cluster) * 100, 3), '% of 1s in cluster', i, 'with ', n_components, 'principal components')
+    print('There is ', round(len(cluster_7s) / len(cluster) * 100, 3), '% of 7s in cluster', i, 'with ', n_components, 'principal components')
+    print('There is ', round(len(cluster_9s) / len(cluster) * 100, 3), '% of 9s in cluster', i, 'with ', n_components, 'principal components')
     print('\n')
 
-def knn(n_components):
-  eigenvalues, unit_eigenvectors, mean = pca(mnist_X)
-  mnist_X = multidimension_scaling(mnist_X, n_components, show_pc_plots=False)
+
+def knn__init__(n_components, show_pc_plots=False):
+  mnist_X = np.loadtxt('datasets/MNIST_179_digits.txt')
+  mnist_y = np.loadtxt('datasets/MNIST_179_labels.txt')
+
+  # eigenvalues, unit_eigenvectors, mean = pca(mnist_X)
+  pca = PCA(n_components=n_components)
+
+  mnist_X = pca.fit_transform(mnist_X)
+  # mnist_X = multidimension_scaling(mnist_X, n_components, show_pc_plots=show_pc_plots) #.T
+
+  possible_ks = []
+
+  for k in range(1, 25):
+    if k % 2 != 0:
+      possible_ks.append(k)
+  
+  cv_scores = []
+
+  for k in possible_ks:
+    knn_clf = KNeighborsClassifier(n_neighbors=k)
+    scores = cross_val_score(knn_clf, mnist_X, mnist_y, cv=5, scoring='accuracy')
+
+    cv_scores.append(scores.mean())
+
+  mse = [x for x in cv_scores]
+
+  optimal_k = possible_ks[mse.index(max(mse))]
+  print("The optimal number of neighbors is %d" % optimal_k)
+
+  plt.plot(possible_ks, mse)
+  plt.xlabel('Number of Neighbors K')
+  plt.ylabel('Accuracy')
+  plt.tight_layout()
+  plt.show()
+
+  knn_clf_optimal = KNeighborsClassifier(n_neighbors=1)
+  X_train, X_test, y_train, y_test = train_test_split(mnist_X, mnist_y, test_size=0.2, random_state=42)
+  knn_clf_optimal.fit(X_train, y_train)
+  print('knn accuracy with best k = 1 is: ', knn_clf_optimal.score(X_test, y_test))
 
 
-pca__init__(20)
-pca__init__(200)
+kmneans__init__(20, show_pc_plots=True)
+kmneans__init__(200, show_pc_plots=True)
+
+knn__init__(20, show_pc_plots=False)
+knn__init__(200, show_pc_plots=False)
+

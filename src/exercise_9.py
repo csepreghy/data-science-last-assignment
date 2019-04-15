@@ -42,5 +42,4 @@ def display_digit(digit, labeled=True, title=""):
     plt.title("Inferred label: " + str(title))
 
 
-
 kmeans__init__()
